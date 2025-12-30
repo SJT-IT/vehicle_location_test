@@ -1,112 +1,6 @@
-// import 'package:flutter/material.dart';
-
-// class VehicleDetailScreen extends StatelessWidget {
-//   final String vehicleId;
-
-//   const VehicleDetailScreen({super.key, required this.vehicleId});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Placeholder data
-//     final placeholderData = {
-//       "model": "--",
-//       "color": "--",
-//       "odometer": "--",
-//       "mileage": "--",
-//       "fuelType": "--",
-//       "registration": "--",
-//       "lastService": "--",
-//       "insuranceExpiry": "--",
-//       "status": "Loading...",
-//     };
-
-//     return Scaffold(
-//       appBar: AppBar(title: Text("Vehicle Details")),
-//       body: ListView(
-//         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-//         children: [
-//           // Header
-//           ListTile(
-//             leading: Icon(
-//               Icons.directions_car,
-//               size: 60,
-//               color: Colors.blueAccent,
-//             ),
-//             title: Text(
-//               placeholderData["model"]!,
-//               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-//             ),
-//             subtitle: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 SizedBox(height: 8),
-//                 Text(
-//                   "Vehicle ID: $vehicleId",
-//                   style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-//                 ),
-//                 SizedBox(height: 4),
-//                 Text(
-//                   "Status: ${placeholderData["status"]}",
-//                   style: TextStyle(fontSize: 18, color: Colors.grey[800]),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           Divider(height: 40, thickness: 2),
-
-//           // Vehicle Details
-//           _buildListTile(Icons.color_lens, "Color", placeholderData["color"]!),
-//           _buildListTile(Icons.speed, "Odometer", placeholderData["odometer"]!),
-//           _buildListTile(
-//             Icons.local_gas_station,
-//             "Mileage",
-//             placeholderData["mileage"]!,
-//           ),
-//           _buildListTile(
-//             Icons.ev_station,
-//             "Fuel Type",
-//             placeholderData["fuelType"]!,
-//           ),
-//           _buildListTile(
-//             Icons.confirmation_number,
-//             "Registration",
-//             placeholderData["registration"]!,
-//           ),
-//           _buildListTile(
-//             Icons.build_circle,
-//             "Last Service",
-//             placeholderData["lastService"]!,
-//           ),
-//           _buildListTile(
-//             Icons.assignment_turned_in,
-//             "Insurance Expiry",
-//             placeholderData["insuranceExpiry"]!,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   // Helper to build a ListTile for each detail
-//   Widget _buildListTile(IconData icon, String label, String value) {
-//     return ListTile(
-//       leading: Icon(icon, color: Colors.blueAccent, size: 28),
-//       title: Text(
-//         label,
-//         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-//       ),
-//       trailing: Text(
-//         value,
-//         style: TextStyle(fontSize: 20, color: Colors.grey[800]),
-//       ),
-//       contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 
-// Mock model class for Vehicle
+/// Mock Vehicle model
 class Vehicle {
   final String id;
   final String model;
@@ -117,6 +11,7 @@ class Vehicle {
   final String registration;
   final String lastService;
   final String insuranceExpiry;
+  final String pucExpiry;
   final String status;
 
   Vehicle({
@@ -129,6 +24,7 @@ class Vehicle {
     required this.registration,
     required this.lastService,
     required this.insuranceExpiry,
+    required this.pucExpiry,
     required this.status,
   });
 }
@@ -138,13 +34,10 @@ class VehicleDetailScreen extends StatelessWidget {
 
   const VehicleDetailScreen({super.key, required this.vehicleId});
 
-  // Simulate fetching vehicle data from DB
+  /// Simulated DB call
   Future<Vehicle> fetchVehicleFromDB(String id) async {
-    // Simulate network/database delay
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
 
-    // Here you would normally query your DB
-    // For now we return fake data
     return Vehicle(
       id: id,
       model: "E-Verito",
@@ -153,8 +46,9 @@ class VehicleDetailScreen extends StatelessWidget {
       mileage: 200,
       fuelType: "Electric",
       registration: "AB12 XYZ",
-      lastService: "2025-11-15",
-      insuranceExpiry: "2026-04-30",
+      lastService: "15 Nov 2025",
+      insuranceExpiry: "30 Apr 2026",
+      pucExpiry: "30 Apr 2026",
       status: "Active",
     );
   }
@@ -162,102 +56,138 @@ class VehicleDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Vehicle Details")),
+      backgroundColor: Colors.grey.shade100,
+      appBar: AppBar(
+        title: const Text("Vehicle Details"),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
       body: FutureBuilder<Vehicle>(
         future: fetchVehicleFromDB(vehicleId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // Loading state
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            // Error state
-            return Center(child: Text("Error fetching vehicle data"));
-          } else if (!snapshot.hasData) {
-            return Center(child: Text("No data found"));
+            return const Center(child: CircularProgressIndicator());
           }
 
-          // Data loaded
+          if (!snapshot.hasData) {
+            return const Center(child: Text("Failed to load vehicle data"));
+          }
+
           final vehicle = snapshot.data!;
 
-          return ListView(
-            padding: const EdgeInsets.symmetric(
-              vertical: 16.0,
-              horizontal: 16.0,
-            ),
-            children: [
-              // Header
-              ListTile(
-                leading: Icon(
-                  Icons.directions_car,
-                  size: 60,
-                  color: Colors.blueAccent,
-                ),
-                title: Text(
-                  vehicle.model,
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 8),
-                    Text(
-                      "Vehicle ID: ${vehicle.id}",
-                      style: TextStyle(fontSize: 18, color: Colors.grey[700]),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "Status: ${vehicle.status}",
-                      style: TextStyle(fontSize: 18, color: Colors.grey[800]),
-                    ),
-                  ],
-                ),
-              ),
-              Divider(height: 40, thickness: 2),
+          return ShaderMask(
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (rect) {
+              return const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black, Colors.black, Colors.transparent],
+                stops: [0.0, 0.93, 1.0], // 👈 reduced bottom fade
+              ).createShader(rect);
+            },
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              children: [
+                _buildHeader(vehicle),
 
-              // Vehicle details
-              _buildListTile(Icons.color_lens, "Color", vehicle.color),
-              _buildListTile(Icons.speed, "Odometer", "${vehicle.odometer} km"),
-              _buildListTile(
-                Icons.local_gas_station,
-                "Mileage",
-                "${vehicle.mileage} km/Full Charge",
-              ),
-              _buildListTile(Icons.ev_station, "Fuel Type", vehicle.fuelType),
-              _buildListTile(
-                Icons.confirmation_number,
-                "Registration",
-                vehicle.registration,
-              ),
-              _buildListTile(
-                Icons.build_circle,
-                "Last Service",
-                vehicle.lastService,
-              ),
-              _buildListTile(
-                Icons.assignment_turned_in,
-                "Insurance Expiry",
-                vehicle.insuranceExpiry,
-              ),
-            ],
+                _infoTile(Icons.color_lens_outlined, "Color", vehicle.color),
+                _infoTile(
+                  Icons.speed_outlined,
+                  "Odometer",
+                  "${vehicle.odometer} km",
+                ),
+                _infoTile(
+                  Icons.ev_station_outlined,
+                  "Mileage",
+                  "${vehicle.mileage} km / Full Charge",
+                ),
+                _infoTile(Icons.bolt_outlined, "Fuel Type", vehicle.fuelType),
+                _infoTile(
+                  Icons.confirmation_number_outlined,
+                  "Registration",
+                  vehicle.registration,
+                ),
+                _infoTile(
+                  Icons.build_outlined,
+                  "Last Service",
+                  vehicle.lastService,
+                ),
+                _infoTile(
+                  Icons.verified_outlined,
+                  "Insurance Expiry",
+                  vehicle.insuranceExpiry,
+                ),
+                _infoTile(Icons.eco_outlined, "PUC", vehicle.pucExpiry),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  // Helper to build a ListTile for each detail
-  Widget _buildListTile(IconData icon, String label, String value) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.blueAccent, size: 28),
-      title: Text(
-        label,
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  /// Header card (avatar style like image)
+  Widget _buildHeader(Vehicle vehicle) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 30,
+          backgroundColor: Colors.blue.shade100,
+          child: const Icon(Icons.directions_car, size: 30, color: Colors.blue),
+        ),
+        title: Text(
+          vehicle.model,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            "Vehicle ID: ${vehicle.id}\nStatus: ${vehicle.status}",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              height: 1.4,
+            ),
+          ),
+        ),
       ),
-      trailing: Text(
-        value,
-        style: TextStyle(fontSize: 20, color: Colors.grey[800]),
+    );
+  }
+
+  /// Info rows with subtle icons
+  Widget _infoTile(IconData icon, String label, String value) {
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        leading: CircleAvatar(
+          radius: 20,
+          backgroundColor: Colors.blue.shade50,
+          child: Icon(icon, size: 20, color: Colors.blue.shade600),
+        ),
+        title: Text(
+          label,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            value,
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+        ),
       ),
-      contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
     );
   }
 }
