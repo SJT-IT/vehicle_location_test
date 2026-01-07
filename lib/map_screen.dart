@@ -44,38 +44,36 @@ class _MapScreenState extends State<MapScreen> {
 
       if (data == null) return;
 
-      setState(() {
-        _markers.clear();
-      });
+      final Set<Marker> newMarkers = {};
 
       data.forEach((vehicleId, vehicleData) {
         final double latitude = vehicleData['lat'];
         final double longitude = vehicleData['lng'];
 
-        _addVehicleMarker(vehicleId, latitude, longitude);
+        newMarkers.add(
+          Marker(
+            markerId: MarkerId(vehicleId),
+            position: LatLng(latitude, longitude),
+            icon: vehicleIcon ?? BitmapDescriptor.defaultMarker,
+            onTap: () {
+              VehicleInfoBottomSheet.show(
+                context: context,
+                vehicleId: vehicleId,
+                latitude: latitude,
+                longitude: longitude,
+                otherInfo: "Status: Active",
+              );
+            },
+          ),
+        );
       });
-    });
-  }
 
-  /// Add vehicle marker
-  void _addVehicleMarker(String vehicleId, double latitude, double longitude) {
-    setState(() {
-      _markers.add(
-        Marker(
-          markerId: MarkerId(vehicleId),
-          position: LatLng(latitude, longitude),
-          icon: vehicleIcon ?? BitmapDescriptor.defaultMarker,
-          onTap: () {
-            VehicleInfoBottomSheet.show(
-              context: context,
-              vehicleId: vehicleId,
-              latitude: latitude,
-              longitude: longitude,
-              otherInfo: "Status: Active", // optional, can be null
-            );
-          },
-        ),
-      );
+      // 🔥 ONE rebuild only
+      setState(() {
+        _markers
+          ..clear()
+          ..addAll(newMarkers);
+      });
     });
   }
 

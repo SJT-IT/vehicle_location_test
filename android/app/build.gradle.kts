@@ -8,14 +8,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// --- Load local.properties ---
+// --- Load key.properties ---
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("key.properties")
 if (localPropertiesFile.exists()) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
 
-// Read the Maps API key from local.properties
+// Read the Maps API key
 val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
 
 android {
@@ -39,8 +39,8 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Pass the API key to the manifest safely
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        // Inject API key as a string resource
+        resValue("string", "google_maps_api_key", mapsApiKey)
     }
 
     buildTypes {
